@@ -1,20 +1,24 @@
 import { FlexBubble, FlexContainer } from '@line/bot-sdk';
+import { convertTimeframe } from '../../../utils/tradingviewUtils';
 
 export interface EntrySignalMessageProp {
   symbol: string;
+  timeframe: string;
   direction: 'long' | 'short';
-  entry_price: number;
-  sl_price: number;
+  price: number;
+  target: number;
 }
 
 export const EntrySignalMessage = (
   order: EntrySignalMessageProp
 ): FlexContainer => {
-  const { symbol, direction, entry_price, sl_price } = order ?? {};
+  const { symbol, timeframe, direction, price, target } = order ?? {};
   const color = {
     green: '#088249',
     red: '#bd1b06',
   };
+
+  const tf = convertTimeframe(timeframe)
 
   return {
     type: 'bubble',
@@ -24,7 +28,7 @@ export const EntrySignalMessage = (
       contents: [
         {
           type: 'text',
-          text: `${direction.toUpperCase()} ${symbol}`,
+          text: `${direction.toUpperCase()} ${symbol}-${tf}`,
           size: 'lg',
           weight: 'bold',
           color: direction === 'long' ? color.green : color.red,
@@ -38,7 +42,7 @@ export const EntrySignalMessage = (
       contents: [
         {
           type: 'text',
-          text: `${symbol}`,
+          text: `${symbol}-${tf}`,
           weight: 'bold',
           size: 'xl',
         },
@@ -62,7 +66,7 @@ export const EntrySignalMessage = (
                 },
                 {
                   type: 'text',
-                  text: `${entry_price}`,
+                  text: `${price}`,
                   wrap: true,
                   color: '#666666',
                   size: 'sm',
@@ -85,7 +89,7 @@ export const EntrySignalMessage = (
                 },
                 {
                   type: 'text',
-                  text: `${sl_price}`,
+                  text: `${target}`,
                   wrap: true,
                   color: '#bd1b06',
                   size: 'sm',

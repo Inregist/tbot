@@ -6,12 +6,12 @@ import MemDBService from './services/database';
 
 const app = express();
 
-// const db = new MemDBService();
-
-// const line = new LineService(
-//   process.env.LINE_CHANNEL_ACCESS_TOKEN ?? '',
-//   process.env.LINE_CHANNEL_SECRET ?? ''
-// );
+const db = new MemDBService();
+const line = new LineService(
+  process.env.LINE_CHANNEL_ACCESS_TOKEN ?? '',
+  process.env.LINE_CHANNEL_SECRET ?? '',
+  db
+);
 
 app.use(helmet());
 app.use(bodyParser.json());
@@ -25,18 +25,22 @@ app.post('/tv', async (req: Request, res: Response) => {
   const time = new Date();
   console.log(time);
   console.log(req.body);
-  console.log('\n');
 
   try {
     // call binance api
     // binance.openOrder()
     // send line notification
-    // line.sendEntrySignalMessage(req.body);
+    line.sendEntrySignalMessage(req.body);
   } catch (e: any) {
     console.error(e.message);
   }
 
   res.status(200).send('OK');
+});
+
+app.post('/line-hook', async (req: Request, res: Response) => {
+  console.log(JSON.stringify(req.body, null, 2))
+  res.status(200).send("OK")
 });
 
 // app.get('/calculate-pos-size')

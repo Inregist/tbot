@@ -1,24 +1,36 @@
 import { Client, FlexMessage } from '@line/bot-sdk';
+import { convertTimeframe } from '../../utils/tradingviewUtils';
+import MemDBService from '../database';
 import { EntrySignalMessage, EntrySignalMessageProp } from './flexMessages';
 
 export default class LineService {
   private client: Client;
+  private db: MemDBService;
 
-  constructor(accessToken: string, secret: string) {
+  constructor(accessToken: string, secret: string, db: MemDBService) {
     this.client = new Client({
       channelAccessToken: accessToken,
       channelSecret: secret,
     });
+
+    this.db = db
   }
 
   async sendEntrySignalMessage(signal: EntrySignalMessageProp) {
-    const { symbol, direction, entry_price, sl_price } = signal ?? {};
+    const { symbol, timeframe: tvTF, direction, price, target } = signal ?? {};
+    const timeframe = convertTimeframe(tvTF)
+    const userIds = this.db.userSymbol
+      .select({ where: { symbolId: `${symbol}-${timeframe}` } })
+      .map(us => us.lineId)
+
     const msg: FlexMessage = {
       type: 'flex',
-      altText: `${direction.toUpperCase()} ${symbol} at ${entry_price}, sl: ${sl_price}`,
+      altText: `${direction.toUpperCase()} ${symbol} at ${price}, sl: ${target}`,
       contents: EntrySignalMessage(signal),
     };
 
-    this.client.broadcast(msg);
+    console.log("userIds:", userIds)
+    if (userIds.length > 0)
+      this.client.multicast(userIds, msg);
   }
 }
