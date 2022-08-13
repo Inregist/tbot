@@ -1,8 +1,8 @@
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 
-class MemDB {
-  db: any[] = [];
+export default class MemDB {
+  private db: any[] = [];
 
   constructor(path: string) {
     if (!path.endsWith('.json')) throw new Error('Need .json file as path');
@@ -98,5 +98,3 @@ class MemDB {
     }
   }
 }
-
-module.exports = MemDB;

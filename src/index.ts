@@ -1,17 +1,19 @@
-import express from 'express';
-const bodyParser = require('body-parser');
-const line = require('@line/bot-sdk');
-const { OrderMessage } = require('./flexMessage');
+import express, { Request, Response } from 'express';
+import bodyParser from 'body-parser';
+import helmet from 'helmet';
+import LineService from './services/line';
+import MemDBService from './services/database';
 
 const app = express();
 
-const DB = require('./memdb-json');
+// const db = new MemDBService();
 
-const client = new line.Client({
-  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-  channelSecret: process.env.LINE_CHANNEL_SECRET,
-});
+// const line = new LineService(
+//   process.env.LINE_CHANNEL_ACCESS_TOKEN ?? '',
+//   process.env.LINE_CHANNEL_SECRET ?? ''
+// );
 
+app.use(helmet());
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
@@ -19,27 +21,19 @@ app.use(
   })
 );
 
-app.post('/tv', async (req, res) => {
+app.post('/tv', async (req: Request, res: Response) => {
   const time = new Date();
   console.log(time);
   console.log(req.body);
   console.log('\n');
 
-  // call binance api
-  // binance.openOrder()
-
-  // send line notification
-  const { symbol, direction, entry_price, sl_price, tp_price } = req.body ?? {};
-  const msg = {
-    type: 'flex',
-    altText: `${direction.toUpperCase()} ${symbol} at ${entry_price}, sl: ${sl_price}, tp: ${tp_price}`,
-    contents: OrderMessage(req.body),
-  };
-
   try {
-    // client.broadcast(msg)
+    // call binance api
+    // binance.openOrder()
+    // send line notification
+    // line.sendEntrySignalMessage(req.body);
   } catch (e: any) {
-    console.log(e.message);
+    console.error(e.message);
   }
 
   res.status(200).send('OK');
