@@ -1,8 +1,8 @@
 [
   {
     "lineId": "U6126bbf3ce9a03d48ea2826de5cd4901",
-  	"symbolId": "BTCUSD-1m",
-  	"autoTrade": false,
+  	"symbolId": "BTCUSDT-1m",
+  	"autoTrade": true,
   	"risk": 5,
   	"riskUnit": "PERCENT",
   	"isCompund": false
