@@ -1,8 +1,8 @@
 [
   {
-    id: "BTCUSDT-1m"
-    symbol: "BTCUSDT"
-  	timeframe: "1m";
-  	trend: "RANGED";
+    "id": "BTCUSDT-1m",
+    "symbol": "BTCUSDT",
+  	"timeframe": "1m",
+  	"trend": "RANGED"
   }
 ]
