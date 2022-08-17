@@ -27,7 +27,7 @@ export default class MemDB {
     return obj.memDBID;
   }
 
-  select(obj: any) {
+  select(obj?: any) {
     if (obj === undefined) return this.db;
     else {
       if (Object.keys(obj).indexOf('where') === -1 || !this.#isJSONObject(obj))

@@ -13,15 +13,11 @@ export default class LineService {
       channelSecret: secret,
     });
 
-    this.db = db
+    this.db = db;
   }
 
-  async sendEntrySignalMessage(signal: EntrySignalMessageProp) {
-    const { symbol, timeframe: tvTF, direction, price, target } = signal ?? {};
-    const timeframe = convertTimeframe(tvTF)
-    const userIds = this.db.userSymbol
-      .select({ where: { symbolId: `${symbol}-${timeframe}` } })
-      .map(us => us.lineId)
+  async sendEntrySignalMessage(userIds: any[], signal: EntrySignalMessageProp) {
+    const { symbol, direction, price, target } = signal ?? {};
 
     const msg: FlexMessage = {
       type: 'flex',
@@ -29,8 +25,7 @@ export default class LineService {
       contents: EntrySignalMessage(signal),
     };
 
-    console.log("userIds:", userIds)
-    if (userIds.length > 0)
-      this.client.multicast(userIds, msg);
+    console.log('userIds:', userIds);
+    if (userIds.length > 0) this.client.multicast(userIds, msg);
   }
 }
