@@ -4,5 +4,11 @@
     "symbol": "BTCUSDT",
   	"timeframe": "1m",
   	"trend": "RANGED"
+  },
+  {
+    "id": "ETHUSDT-1m",
+    "symbol": "ETHUSDT",
+  	"timeframe": "1m",
+  	"trend": "RANGED"
   }
 ]

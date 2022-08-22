@@ -12,7 +12,8 @@ export interface EntrySignalMessageProp {
 export const EntrySignalMessage = (
   order: EntrySignalMessageProp
 ): FlexContainer => {
-  const { symbol, timeframe, direction, price, target } = order ?? {};
+  const { symbol: symbolId, timeframe, direction, price, target } = order ?? {};
+  const symbol = symbolId.split('-')[0]
   const color = {
     green: '#088249',
     red: '#bd1b06',

@@ -6,6 +6,8 @@ import MemDBService from './services/database';
 import dotenv from 'dotenv';
 import BinanceService from './services/binance';
 import { convertTimeframe } from './utils/tradingviewUtils';
+import { TradingViewSignal } from './types/TradingView';
+import { OrderSide } from './services/binance/BinanceApi';
 
 dotenv.config();
 const app = express();
@@ -31,10 +33,13 @@ app.post('/tv', async (req: Request, res: Response) => {
   console.log(time);
   console.log(req.body);
 
+  const body: TradingViewSignal = req.body;
+
   try {
     // fetch users
-    const { symbol, timeframe, direction, price, target } = req.body;
+    const { type, symbol, timeframe, direction, price, target } = body;
     const tf = convertTimeframe(timeframe);
+    const side = direction === 'long' ? OrderSide.BUY : OrderSide.SELL;
     const userSymbols = db.userSymbol.select({
       where: { symbolId: `${symbol}-${tf}` },
     });
@@ -44,26 +49,43 @@ app.post('/tv', async (req: Request, res: Response) => {
     console.log('userSymbols', userSymbols);
     console.log('users', users);
 
-    // call binance api
-    const orders = await Promise.all(
-      users.map((u) =>
-        binance.CreateOrder({
-          apiKey: u.apiToken,
-          apiSecret: u.apiSecret,
-          symbol,
-          side: direction === 'long' ? 'BUY' : 'SELL',
-          price,
-          stopLoss: target,
-        })
-      )
-    );
-    console.log(orders);
+    if (type === 'entry') {
+      // call binance api
+      const orders = await Promise.all(
+        users.map((u) =>
+          binance.CreateOrder({
+            apiKey: u.apiToken,
+            apiSecret: u.apiSecret,
+            symbol,
+            side,
+            price,
+            stopLoss: target,
+          })
+        )
+      );
+      console.log(orders);
 
-    // send line notification
-    line.sendEntrySignalMessage(
-      userSymbols.map((us) => us.lineId),
-      req.body
-    );
+      // send line notification
+      // line.sendEntrySignalMessage(
+      //   userSymbols.map((us) => us.lineId),
+      //   body
+      // );
+    }
+    if (type === 'exit') {
+      // call binance api
+      const orders = await Promise.all(
+        users.map((u) =>
+          binance.CloseOrder({
+            apiKey: u.apiToken,
+            apiSecret: u.apiSecret,
+            symbol,
+            price,
+            side,
+          })
+        )
+      );
+      console.log(orders);
+    }
   } catch (e: any) {
     console.error(e.message);
   }
