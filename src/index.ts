@@ -44,22 +44,24 @@ app.post('/tv', async (req: Request, res: Response) => {
       where: { symbolId: `${symbol}-${tf}` },
     });
 
-    const ids = userSymbols.filter((us) => us.autoTrade).map((us) => us.lineId);
-    const users = db.user.select().filter((u) => ids.includes(u.lineId));
+    const traders = userSymbols.filter((us) => us.autoTrade);
+    // const users = db.user.select().filter((u) => ids.includes(u.lineId));
     console.log('userSymbols', userSymbols);
-    console.log('users', users);
+    console.log('traders', traders);
 
     if (type === 'entry') {
       // call binance api
       const orders = await Promise.all(
-        users.map((u) =>
+        traders.map((t) =>
           binance.CreateOrder({
-            apiKey: u.apiToken,
-            apiSecret: u.apiSecret,
+            apiKey: t.apiToken,
+            apiSecret: t.apiSecret,
             symbol,
             side,
             price,
             stopLoss: target,
+            risk: t.risk,
+            riskTotal: t.riskTotal
           })
         )
       );
@@ -74,10 +76,10 @@ app.post('/tv', async (req: Request, res: Response) => {
     if (type === 'exit') {
       // call binance api
       const orders = await Promise.all(
-        users.map((u) =>
+        traders.map((t) =>
           binance.CloseOrder({
-            apiKey: u.apiToken,
-            apiSecret: u.apiSecret,
+            apiKey: t.apiToken,
+            apiSecret: t.apiSecret,
             symbol,
             price,
             side,

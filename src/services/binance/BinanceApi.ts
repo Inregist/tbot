@@ -102,14 +102,17 @@ export const CreateOrder = async (signal: ApiCreateOrder) => {
     timeInForce: 'GTC',
   };
 
-  const { data: orderResult } = await axios.post(
-    `${url}/fapi/v1/order?${queryToString(apiSecret, payload, true)}`,
-    null,
-    { headers }
-  );
-  console.log('createOrderResult:', orderResult);
-
-  return orderResult;
+  try {
+    const { data: orderResult } = await axios.post(
+      `${url}/fapi/v1/order?${queryToString(apiSecret, payload, true)}`,
+      null,
+      { headers }
+    );
+    console.log('createOrderResult:', orderResult);
+    return orderResult;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const CancelOrders = async (order: ApiCloseOrder) => {

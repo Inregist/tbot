@@ -15,6 +15,8 @@ export interface CreateOrder extends Key {
   side: OrderSide;
   price: number;
   stopLoss: number;
+  risk: number;
+  riskTotal: number;
 }
 
 export interface CloseOrder extends Key {
@@ -23,13 +25,19 @@ export interface CloseOrder extends Key {
   side: OrderSide;
 }
 
+interface GetUserBalance extends Key {
+  symbol?: string;
+}
+
 const url = 'https://testnet.binancefuture.com';
 export default class BinanceService {
-  async GetUserBalance(key: Key) {
+  async GetUserBalance(prop: GetUserBalance) {
+    const { symbol } = prop;
+    let leverage = 1;
     try {
       const [balanceList, positionList] = await Promise.all([
-        GetBalance(key),
-        GetPositions(key),
+        GetBalance(prop),
+        GetPositions(prop),
       ]);
 
       const balance = balanceList.reduce(
@@ -40,43 +48,60 @@ export default class BinanceService {
       );
 
       const positionSize = Math.abs(
-        positionList.reduce(
-          (sum: number, p: any) =>
+        positionList.reduce((sum: number, p: any) => {
+          if (p.symbol === symbol) {
+            leverage = p.leverage ?? 1;
+            console.log('leverage:', symbol, leverage);
+          }
+
+          return (
             sum +
-            (p.symbol.match(/USDT|BUSD/) ? parseFloat(p.notional ?? 0) : 0),
-          0
-        )
+            (p.symbol.match(/USDT|BUSD/) ? parseFloat(p.notional ?? 0) : 0)
+          );
+        }, 0)
       );
 
       console.log({ balance, positionSize });
-      const risk = (positionSize / (balance + positionSize)) * 100;
+      const totalBalance = balance + positionSize;
+      const risk = (positionSize / totalBalance) * 100;
 
-      return { balance, risk };
+      return { balance, totalBalance, risk, leverage };
     } catch (e) {
       console.log(e);
     }
 
-    return { balance: 0, risk: 0 };
+    return { balance: 0, risk: 0, leverage, totalBalance: 0 };
   }
 
   async CreateOrder(order: CreateOrder) {
-    const { apiKey, apiSecret } = order;
+    const { apiKey, apiSecret, symbol, price, risk, riskTotal } = order;
 
     // fetch balance
-    const { balance, risk } = await this.GetUserBalance({ apiKey, apiSecret });
-    console.log('balance:', balance);
+    const {
+      totalBalance,
+      risk: currentRisk,
+      leverage,
+    } = await this.GetUserBalance({
+      apiKey,
+      apiSecret,
+      symbol
+    });
+    console.log('totalBalance:', totalBalance);
     console.log('risk:', risk);
 
     // cal pos size
-    if (risk > 5) return;
-    const quantity = 0.01;
+    if (currentRisk > riskTotal) return;
+    if (risk === 0) return;
+    const quantity = parseFloat(
+      ((leverage * totalBalance * (risk / 100)) / price).toFixed(3)
+    );
 
     // create order
     return CreateOrder({ ...order, quantity });
   }
 
   async CloseOrder(signal: CloseOrder) {
-    const { symbol, price, side, apiKey, apiSecret } = signal;
+    const { symbol, price, apiKey, apiSecret } = signal;
     const headers = {
       'X-MBX-APIKEY': apiKey,
     };

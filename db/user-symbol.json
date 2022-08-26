@@ -3,16 +3,20 @@
     "lineId": "U6126bbf3ce9a03d48ea2826de5cd4901",
   	"symbolId": "BTCUSDT-1m",
   	"autoTrade": true,
-  	"risk": 5,
-  	"riskUnit": "PERCENT",
-  	"isCompund": false
+		"apiToken": "855264a43cbb58474e7f4ae44416b355a11a57f56b476a78aa2774cf8acaff8c",
+  	"apiSecret": "2ecef300c5df809a459ba67d3a57e6bf40631e9f7550653048e095e8ebc13d67",
+  	"risk": 2,
+  	"riskTotal": 5,
+  	"isCompound": false
   },
   {
     "lineId": "U6126bbf3ce9a03d48ea2826de5cd4901",
   	"symbolId": "ETHUSDT-1m",
   	"autoTrade": true,
-  	"risk": 5,
-  	"riskUnit": "PERCENT",
-  	"isCompund": false
+		"apiToken": "855264a43cbb58474e7f4ae44416b355a11a57f56b476a78aa2774cf8acaff8c",
+  	"apiSecret": "2ecef300c5df809a459ba67d3a57e6bf40631e9f7550653048e095e8ebc13d67",
+  	"risk": 2,
+  	"riskTotal": 5,
+  	"isCompound": false
   }
 ]
